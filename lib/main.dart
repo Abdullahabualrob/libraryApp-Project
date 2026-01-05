@@ -4,14 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 
-import 'LoginRegisterPage.dart';
-import 'HomePage.dart';
-import 'BookDetailsPage.dart';
-import 'AddBookPage.dart';
-import 'EditBookPage.dart';
-import 'MyBorrowedBooksPage.dart';
-import 'AboutPage.dart';
-import 'SignUpPage.dart';
+import 'pages/LoginRegisterPage.dart';
+import 'pages/HomePage.dart';
+import 'pages/EditBookPage.dart';
+import 'pages/MyBorrowedBooksPage.dart';
+import 'pages/SignUpPage.dart';
+import 'pages/BookDetailsPage.dart';
+import 'pages/AddBookPage.dart';
+import 'pages/AboutPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
