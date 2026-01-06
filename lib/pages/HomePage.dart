@@ -1,50 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
+import '../providers/user_provider.dart';
+
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-
-  bool isAdmin = false;
-  bool loadingUser = true;
-
-  @override
-  void initState() {
-    super.initState();
-    getUserRole();
-  }
-
-  Future<void> getUserRole() async {
-    try {
-      final uid = FirebaseAuth.instance.currentUser!.uid;
-
-      final userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(uid)
-          .get();
-
-      setState(() {
-        isAdmin = userDoc["isAdmin"] ?? false;
-        loadingUser = false;
-      });
-
-    } catch (e) {
-      setState(() => loadingUser = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
 
+    final isAdmin = Provider.of<UserProvider>(context,listen:  true).isAdmin;
+
+    return Scaffold(
       appBar: AppBar(
-        title: const Text("📚 Library Home"),
+        title: const Text(" Library Home"),
         backgroundColor: Colors.red,
         centerTitle: true,
       ),
@@ -80,7 +51,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () => Navigator.pushNamed(context, '/borrowed'),
             ),
 
-            // 🔥 زر إضافة كتاب — Admin Only
+
             if (isAdmin)
               ListTile(
                 leading: const Icon(Icons.add),
@@ -93,6 +64,7 @@ class _HomePageState extends State<HomePage> {
               title: const Text("Logout"),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
+
                 if (context.mounted) {
                   Navigator.pushReplacementNamed(context, '/login');
                 }
@@ -102,13 +74,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      body: loadingUser
-          ? const Center(child: CircularProgressIndicator())
-          : StreamBuilder(
+      body: StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('books')
-            .orderBy("createdAt", descending: true)
-            .snapshots(),
+            .collection('books').snapshots(),
 
         builder: (context, snapshot) {
 
@@ -119,7 +87,7 @@ class _HomePageState extends State<HomePage> {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
               child: Text(
-                "No books available yet 📚",
+                "No books available yet ",
                 style: TextStyle(fontSize: 18),
               ),
             );
@@ -132,7 +100,7 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
 
               var book = docs[index];
-              var data = book.data() as Map<String, dynamic>;
+              var data = book.data() ;
 
               return Card(
                 margin: const EdgeInsets.all(10),
@@ -148,7 +116,6 @@ class _HomePageState extends State<HomePage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
 
-                      // ✏️ Edit — Admin Only
                       if (isAdmin)
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
@@ -161,7 +128,6 @@ class _HomePageState extends State<HomePage> {
                           },
                         ),
 
-                      // 🗑 Delete — Admin Only
                       if (isAdmin)
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -169,18 +135,18 @@ class _HomePageState extends State<HomePage> {
 
                             final confirm = await showDialog(
                               context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text("Delete Book"),
-                                content: const Text(
+                              builder: (A) => AlertDialog(
+                                title:  Text("Delete Book"),
+                                content:  Text(
                                     "Are you sure you want to delete this book?"),
                                 actions: [
                                   TextButton(
-                                    child: const Text("Cancel"),
+                                    child: Text("Cancel"),
                                     onPressed: () =>
                                         Navigator.pop(context, false),
                                   ),
                                   TextButton(
-                                    child: const Text(
+                                    child: Text(
                                       "Delete",
                                       style: TextStyle(color: Colors.red),
                                     ),

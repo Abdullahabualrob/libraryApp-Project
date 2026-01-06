@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/user_provider.dart';
+import '../models/user_model.dart';
 
 class LoginRegisterPage extends StatefulWidget {
   const LoginRegisterPage({super.key});
@@ -43,7 +47,6 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
 
               const SizedBox(height: 25),
 
-
               TextFormField(
                 controller: userController,
                 validator: (val) {
@@ -85,36 +88,60 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                 ),
               ),
 
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
+
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
 
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(email: userController.text.trim(),
-                          password:passController.text.trim()
+                      UserCredential cred =
+                      await FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                        email: userController.text.trim(),
+                        password: passController.text.trim(),
                       );
 
+                      final uid = cred.user!.uid;
+
+                      final doc = await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(uid)
+                          .get();
+
+                      if (doc.exists) {
+                        final data = doc.data()!;
+
+                        final user = UserModel(
+                          uid: uid,
+                          email: data["email"],
+                          isAdmin: data["isAdmin"] ?? false,
+                        );
+
+                        Provider.of<UserProvider>(context, listen: false)
+                            .setUser(user);
+                      }
+
                       if (context.mounted) {
-                        Navigator.pushReplacementNamed(
-                            context, '/home');
+                        Navigator.pushReplacementNamed(context, '/home');
                       }
 
                     } on FirebaseAuthException catch (e) {
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar (content: Text("Login failed — please try again"),
+                        const SnackBar(
+                          content: Text("Login failed — please try again"),
                         ),
                       );
                     }
-
                   }
                 },
-                child: Text(
+
+                child: const Text(
                   'Login',
                   style: TextStyle(
                     fontSize: 18,
@@ -123,7 +150,9 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 25),
+
+              const SizedBox(height: 25),
+
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, "/signup");

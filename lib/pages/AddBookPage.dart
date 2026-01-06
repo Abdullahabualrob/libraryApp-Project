@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:untitled/providers/user_provider.dart';
 
 
 class AddBookPage extends StatefulWidget {
@@ -17,9 +19,9 @@ class _AddBookPageState extends State<AddBookPage> {
   final authorController = TextEditingController();
   final imageController = TextEditingController();
   final copiesController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
+
 
     return Scaffold(
 

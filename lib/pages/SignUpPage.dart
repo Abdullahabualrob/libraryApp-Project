@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/user_provider.dart';
+import '../models/user_model.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -38,7 +42,7 @@ class _SignUpPageState extends State<SignUpPage> {
           child: ListView(
             children: [
 
-               SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               TextFormField(
                 controller: nameController,
@@ -46,13 +50,13 @@ class _SignUpPageState extends State<SignUpPage> {
                   if(v == null || v.isEmpty) return "Required Name";
                   return null;
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Name",
                   icon: Icon(Icons.person),
                 ),
               ),
 
-             SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: emailController,
@@ -60,13 +64,13 @@ class _SignUpPageState extends State<SignUpPage> {
                   if(v == null || v.isEmpty) return "Required EMAIL";
                   return null;
                 },
-                decoration:  InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Email",
                   icon: Icon(Icons.email),
                 ),
               ),
 
-            SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: passController,
@@ -77,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 },
                 decoration: InputDecoration(
                   labelText: "Password",
-                  icon:  Icon(Icons.lock),
+                  icon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
                     onPressed: (){
                       setState(() {
@@ -85,32 +89,35 @@ class _SignUpPageState extends State<SignUpPage> {
                       });
                     },
                     icon: Icon(
-                      hidePassword ? Icons.visibility : Icons.visibility_off,
+                      hidePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                   ),
                 ),
               ),
 
-               SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
+
                 onPressed: () async {
 
                   if(_formKey.currentState!.validate()){
 
                     try {
 
-                      UserCredential User =
+                      UserCredential userCred =
                       await FirebaseAuth.instance
                           .createUserWithEmailAndPassword(
                         email: emailController.text.trim(),
                         password: passController.text.trim(),
                       );
 
-                      final uid = User.user!.uid;
+                      final uid = userCred.user!.uid;
 
                       await FirebaseFirestore.instance
                           .collection("users")
@@ -121,6 +128,17 @@ class _SignUpPageState extends State<SignUpPage> {
                         "createdAt": Timestamp.now(),
                         "isAdmin": false,
                       });
+
+
+                      final user = UserModel(
+                        uid: uid,
+                        email: emailController.text.trim(),
+                        isAdmin: false,
+                      );
+
+                      Provider.of<UserProvider>(context, listen: false)
+                          .setUser(user);
+
 
                       if(context.mounted){
                         Navigator.pushReplacementNamed(context, "/home");
@@ -133,6 +151,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     }
                   }
                 },
+
                 child: const Text(
                   "Create Account",
                   style: TextStyle(
