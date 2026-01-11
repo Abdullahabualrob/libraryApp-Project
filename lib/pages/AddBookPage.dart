@@ -63,6 +63,10 @@ class _AddBookPageState extends State<AddBookPage> {
               TextFormField(
                 controller: imageController,
                 decoration: InputDecoration(labelText: "Image URL"),
+                validator: (v){
+                  if(v==null || v.isEmpty) return "Enter Image URL";
+                  return null;
+                },
               ),
 
               TextFormField(

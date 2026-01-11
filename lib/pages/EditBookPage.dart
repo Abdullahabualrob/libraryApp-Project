@@ -20,12 +20,11 @@ class _EditBookPageState extends State<EditBookPage> {
   late DocumentSnapshot book;
 
   @override
+
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    book = ModalRoute.of(context)!.settings.arguments as DocumentSnapshot;
+book=ModalRoute.of(context)!.settings.arguments as DocumentSnapshot;
     final data = book.data() as Map<String, dynamic>;
-
     titleCtrl.text = data["title"];
     authorCtrl.text = data["author"];
     imageCtrl.text = data["imageUrl"];
@@ -67,12 +66,13 @@ class _EditBookPageState extends State<EditBookPage> {
               TextFormField(
                 controller: imageCtrl,
                 decoration: const InputDecoration(labelText: "Image URL"),
+                validator: (v) =>
+                v == null || v.isEmpty ? "Image URL" : null,
               ),
 
               TextFormField(
                 controller: copiesCtrl,
-                decoration: const InputDecoration(labelText: "Total Copies"),
-                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: "Total Copies"),
                 validator: (v) =>
                 v == null || v.isEmpty ? "Enter number" : null,
               ),
@@ -86,13 +86,16 @@ class _EditBookPageState extends State<EditBookPage> {
                 onPressed: () async {
 
                   if (_formKey.currentState!.validate()) {
-
-                    await book.reference.update({
+                    await FirebaseFirestore.instance
+                        .collection("books")
+                        .doc(book.id)
+                        .update({
                       "title": titleCtrl.text,
                       "author": authorCtrl.text,
                       "imageUrl": imageCtrl.text,
                       "totalCopies": int.parse(copiesCtrl.text),
                     });
+
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Book updated successfully")),

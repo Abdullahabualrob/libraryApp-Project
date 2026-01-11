@@ -7,21 +7,7 @@ class MyBorrowedBooksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text("My Borrowed Books"),
-          backgroundColor: Colors.red,
-        ),
-        body: const Center(
-          child: Text("Please login first"),
-        ),
-      );
-    }
-
-    final uid = user.uid;
+    final user = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,21 +17,16 @@ class MyBorrowedBooksPage extends StatelessWidget {
 
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection("borrows")
-            .where("userId", isEqualTo: uid)
-            .where("returnDate", isEqualTo: null)
-            .snapshots(),
+            .collection("borrows").where("userId", isEqualTo: user).snapshots(),
 
         builder: (context, snapshot) {
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text("You have not borrowed any books yet 📚"),
-            );
+            return  Center(child: Text("No borrowed books"));
           }
 
           final borrows = snapshot.data!.docs;
@@ -55,9 +36,11 @@ class MyBorrowedBooksPage extends StatelessWidget {
             itemBuilder: (context, index) {
 
               final borrow = borrows[index];
-              final bookId = borrow["bookId"];
+              final dataBorrow=borrow.data();
+              final bookId = dataBorrow["bookId"];
 
-              return FutureBuilder(
+
+              return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
                     .collection("books")
                     .doc(bookId)
@@ -65,59 +48,23 @@ class MyBorrowedBooksPage extends StatelessWidget {
 
                 builder: (context, bookSnap) {
 
-                  if (!bookSnap.hasData) {
-                    return const ListTile(title: Text("Loading..."));
+                  if (!bookSnap.hasData || bookSnap.data!.data() == null) {
+                    return  SizedBox() ;
                   }
 
-                  final book = bookSnap.data!;
-                  final data = book.data() as Map<String, dynamic>;
+                 final dataBook=bookSnap.data!.data() as Map<String,dynamic>;
 
-                  return Card(
-                    margin: const EdgeInsets.all(12),
-                    elevation: 3,
+                  return ListTile(
+                    leading: Image.network(dataBook["imageUrl"], width: 50, fit: BoxFit.cover) ,
 
-                    child: ListTile(
-                      leading: data["imageUrl"] != null
-                          ? Image.network(
-                        data["imageUrl"],
-                        width: 55,
-                        fit: BoxFit.cover,
-                      )
-                          : const Icon(Icons.menu_book, color: Colors.red),
-
-                      title: Text(
-                        data["title"] ?? "Unknown title",
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-
-                          Text("Author: ${data["author"] ?? "Unknown"}"),
-
-                          Text("Available copies: ${data["availableCopies"]}"),
-
-                          Text(
-                            "Borrowed on: "
-                                "${borrow["borrowDate"].toDate().toString().substring(0, 16)}",
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-
-                      trailing: const Icon(Icons.arrow_forward_ios),
-
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/details',
-                          arguments: book,
-                        );
-                      },
+                    title: Text(dataBook["title"] ),
+                    subtitle: Text(
+                      "Return before: ""${dataBorrow["returnDate"].toDate()}",
                     ),
+
+                    onTap: () {
+                      Navigator.pushNamed(context, '/details', arguments: bookSnap.data);
+                    },
                   );
                 },
               );

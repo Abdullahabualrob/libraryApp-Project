@@ -12,69 +12,64 @@ class AboutPage extends StatelessWidget {
         centerTitle: true,
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+              Image.network(
+                  "https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg",
+                  height: 200,
+                  width: 600,
+                  fit: BoxFit.cover,
+                ),
 
-          children: [
 
-            const Icon(
-              Icons.local_library,
-              size: 100,
-              color: Colors.red,
-            ),
+              SizedBox(height: 25), Icon(Icons.local_library, size: 100, color: Colors.red,),
 
-            const SizedBox(height: 20),
+               SizedBox(height: 20),
 
-            const Text(
-              "Library Management App",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+               Text("Library Management App", style: TextStyle(fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
 
-            const SizedBox(height: 10),
+             SizedBox(height: 12),
 
-            const Text(
-              "This app allows users to browse books, borrow them, "
-                  "and manage borrowed books easily using Flutter and Firebase.",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
+             Text("This application allows users to browse books, borrow them, "
+                    "and manage borrowed books easily using Flutter and Firebase.", textAlign: TextAlign.center,
+               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
               ),
-              textAlign: TextAlign.center,
-            ),
 
-            const SizedBox(height: 25),
+             SizedBox(height: 30),
 
-            Text(
-              "Developed by:",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+
+              Text("Developed By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
               ),
-            ),
+              SizedBox(height: 16),
 
-            const SizedBox(height: 8),
+              Text("Abdullah AbuAlrob",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,)),
 
-            const Text(
-              "Abdullah AbuAlrob — Computer Engineering Student",
-              style: TextStyle(fontSize: 16),
-            ),
+              Text("Ayman Aleliat",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,)),
 
-            const SizedBox(height: 30),
+              Text("Ahmed Alkirim",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,)),
 
-            const Text(
-              "Version 1.0",
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
+              const SizedBox(height: 30),
+
+
+              const Text("Version 1.0", style: TextStyle(color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+
 }

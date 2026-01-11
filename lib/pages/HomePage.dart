@@ -58,13 +58,21 @@ class HomePage extends StatelessWidget {
                 title: const Text("Add Book"),
                 onTap: () => Navigator.pushNamed(context, '/add'),
               ),
-
             ListTile(
+             leading: Icon(Icons.info),
+             title: Text("About App"),
+              onTap: () {
+               Navigator.pushNamed(context, '/about');
+               },
+                ),
+
+
+    ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text("Logout"),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
-
+                context.read<UserProvider>().clearUser();
                 if (context.mounted) {
                   Navigator.pushReplacementNamed(context, '/login');
                 }
@@ -156,7 +164,6 @@ class HomePage extends StatelessWidget {
                                 ],
                               ),
                             );
-
                             if (confirm == true) {
                               await FirebaseFirestore.instance
                                   .collection("books")

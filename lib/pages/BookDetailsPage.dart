@@ -8,8 +8,7 @@ class BookDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final DocumentSnapshot book =
-    ModalRoute.of(context)!.settings.arguments as DocumentSnapshot;
+    final DocumentSnapshot book = ModalRoute.of(context)!.settings.arguments as DocumentSnapshot;
 
     final data = book.data() as Map<String, dynamic>;
 
@@ -26,7 +25,6 @@ class BookDetailsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            if ((data["imageUrl"] ?? "").toString().isNotEmpty)
               Center(
                 child: Image.network(
                   data["imageUrl"],
@@ -37,78 +35,89 @@ class BookDetailsPage extends StatelessWidget {
 
             SizedBox(height: 20),
 
-            Text(
-              data["title"] ?? "Book",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Center(
+              child: Text(
+                data["title"],
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
             ),
 
             SizedBox(height: 5),
 
-            Text("Author: ${data["author"] ?? "Unknown"}"),
+            Center(child: Text("Author: ${data["author"] }")),
 
             SizedBox(height: 10),
 
-            Text(
-              "Available copies: ${data["availableCopies"]}",
-              style: TextStyle(fontSize: 16),
-            ),
-
-            SizedBox(height: 10),
-
-            if (data["returnDate"] != null)
-              Text(
-                "Return date: ${data["returnDate"].toDate().toString().substring(0, 16)}",
+            Center(
+              child: Text(
+                "Available copies: ${data["availableCopies"]}",
                 style: TextStyle(fontSize: 16),
               ),
+            ),
+
 
             SizedBox(height: 25),
 
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
 
-              onPressed: () async {
+                onPressed: () async {
 
-                if ((data["availableCopies"] ?? 0) > 0) {
+                  if ((data["availableCopies"] ?? 0) > 0) {
 
-                  try {
+                    try {
+                      final uid = FirebaseAuth.instance.currentUser!.uid;
+                      final borrowDate = DateTime.now();
+                      final returnDate = borrowDate.add(Duration(days: 7));
 
-                    final uid =
-                        FirebaseAuth.instance.currentUser!.uid;
+                      final user = await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(uid)
+                          .get();
 
-                    await FirebaseFirestore.instance.collection("borrows").add({
-                      "userId": uid,
-                      "bookId": book.id,
-                      "borrowDate": Timestamp.now(),
+                      final userdata = user.data() as Map<String, dynamic> ;
 
-                      // 👇 أهم تعديل
-                      "returnDate": data["returnDate"],
-                    });
+                      await FirebaseFirestore.instance.collection("borrows").add({
+                        "userId": uid,
+                        "bookId": book.id,
+                        "borrowDate": Timestamp.now(),
+                        "returnDate": Timestamp.fromDate(returnDate),
+                        "Name":userdata["name"],
+                        "BookName": data["title"]
 
-                    await book.reference.update({
-                      "availableCopies": FieldValue.increment(-1)
-                    });
+                      });
 
+                      await FirebaseFirestore.instance
+                          .collection("books")
+                          .doc(book.id).update({
+                        "availableCopies":FieldValue.increment(-1)
+                          });
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Book borrowed successfully")),
+                      );
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    } catch (e) {
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Error: $e")),
+                      );
+                    }
+
+                  } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Book borrowed successfully")),
-                    );
-
-                  } catch (e) {
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error: $e")),
+                      SnackBar(content: Text("No copies available")),
                     );
                   }
+                },
 
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("No copies available")),
-                  );
-                }
-              },
-
-              child: Text(
-                "Borrow Book",
-                style: TextStyle(color: Colors.white),
+                child: Text(
+                  "Borrow Book",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],

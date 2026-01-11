@@ -37,15 +37,14 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
           child: Column(
             children: [
 
-              const SizedBox(height: 10),
-
               Image.network(
-                'https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg',
-                height: 220,
-                fit: BoxFit.cover,
-              ),
+                  width: double.infinity, height: 300,
+                  'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg',
+                  fit: BoxFit.cover,
+                ),
+         
 
-              const SizedBox(height: 25),
+         SizedBox(height: 25),
 
               TextFormField(
                 controller: userController,
